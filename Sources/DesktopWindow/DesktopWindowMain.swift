@@ -5,10 +5,11 @@ enum DesktopWindowMain {
     @MainActor
     static func main() {
         let application = NSApplication.shared
+        let startsAsDebugWindow = CommandLine.arguments.contains("--debug-window")
+        application.setActivationPolicy(startsAsDebugWindow ? .regular : .accessory)
+
         let delegate = DesktopWindowApp()
         application.delegate = delegate
-        delegate.startIfNeeded()
-        application.finishLaunching()
 
         withExtendedLifetime(delegate) {
             application.run()

@@ -21,6 +21,7 @@ final class DesktopWindowApp: NSObject, NSApplicationDelegate {
         let configuration = loadConfiguration()
         Diagnostics.configure(path: configuration.diagnosticsLogPath)
         Diagnostics.log("start debugWindow=\(configuration.debugWindow) source=\(configuration.source?.youtubeVideoID.rawValue ?? "nil")")
+        RunningInstanceGuard.acquire()
         NSApplication.shared.setActivationPolicy(configuration.debugWindow ? .regular : .accessory)
 
         let manager = BackgroundWindowManager(configuration: configuration)
@@ -49,6 +50,7 @@ final class DesktopWindowApp: NSObject, NSApplicationDelegate {
     }
 
     func applicationWillTerminate(_ notification: Notification) {
+        RunningInstanceGuard.release()
         windowManager?.close()
     }
 
