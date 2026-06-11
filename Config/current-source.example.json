@@ -1,0 +1,19 @@
+{
+  "_comment": "Schema example only. Do not use as a default source. AI agents should create Config/current-source.json locally with a real embeddable live camera.",
+  "title": "Short human-readable title selected by an AI agent",
+  "youtubeVideoID": "YOUTUBE_VIDEO_ID",
+  "fillMode": "fill",
+  "muted": true,
+  "showOverlay": false,
+  "sourceKind": "live",
+  "preferredQuality": "highres",
+  "selectedBy": "Codex",
+  "selectedAt": "ISO8601_LOCAL_TIME",
+  "agentNote": {
+    "headline": "今日は昼の景色から始めましょう",
+    "body": "起動した時刻に昼間の地域を優先して、固定視点のライブカメラを選びます。"
+  },
+  "quote": {
+    "text": "遠くを見る時間を先に置くと、近くの仕事が整いやすい。"
+  }
+}

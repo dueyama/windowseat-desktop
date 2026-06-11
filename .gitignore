@@ -1,0 +1,31 @@
+.DS_Store
+
+# Swift Package Manager
+.build/
+.swiftpm/
+build/
+
+# Xcode local state
+DerivedData/
+*.xcuserstate
+*.xcscmblueprint
+*.xccheckout
+xcuserdata/
+*.xcodeproj/xcuserdata/
+*.xcworkspace/xcuserdata/
+
+# Local configuration and secrets
+.env
+.env.*
+!.env.example
+Config/sources.json
+Config/current-source.json
+Config/*.local.json
+
+# Media should not be committed. Use links or example metadata only.
+Media/
+*.mov
+*.mp4
+*.m4v
+*.webm
+*.mkv

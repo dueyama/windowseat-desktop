@@ -1,0 +1,14 @@
+{
+  "_comment": "Schema example only. Do not use as a default source.",
+  "sources": [
+    {
+      "title": "Short human-readable title selected by an AI agent",
+      "youtubeVideoID": "YOUTUBE_VIDEO_ID",
+      "fillMode": "fit",
+      "muted": true,
+      "showOverlay": false,
+      "sourceKind": "unknown",
+      "preferredQuality": "highres"
+    }
+  ]
+}
