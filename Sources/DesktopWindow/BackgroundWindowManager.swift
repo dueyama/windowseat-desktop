@@ -14,6 +14,10 @@ final class BackgroundWindowManager {
         configuration.source
     }
 
+    var bookmarks: [ScenicSource] {
+        loadBookmarks()
+    }
+
     init(configuration: AppConfiguration) {
         self.configuration = configuration
     }
@@ -50,6 +54,32 @@ final class BackgroundWindowManager {
         configuration.source = source
         persistCurrentSourceIfNeeded(source)
         controllers.forEach { $0.setMuted(muted) }
+    }
+
+    func bookmarkCurrentSource() {
+        guard let source = configuration.source, let bookmarkFileURL else {
+            return
+        }
+
+        do {
+            let bookmarks = try SourceBookmarkStore.load(from: bookmarkFileURL)
+            try SourceBookmarkStore.save(
+                SourceBookmarkStore.upserting(source, into: bookmarks),
+                to: bookmarkFileURL
+            )
+            Diagnostics.log("bookmarked source=\(source.youtubeVideoID.rawValue) to \(bookmarkFileURL.path)")
+            onSourceChanged?()
+        } catch {
+            Diagnostics.log("failed to bookmark source: \(error.localizedDescription)")
+        }
+    }
+
+    func applyBookmark(_ source: ScenicSource) {
+        configuration.source = source
+        persistCurrentSourceIfNeeded(source)
+        controllers.forEach { $0.reload(configuration: configuration) }
+        Diagnostics.log("applied bookmark source=\(source.youtubeVideoID.rawValue)")
+        onSourceChanged?()
     }
 
     func close() {
@@ -158,6 +188,32 @@ final class BackgroundWindowManager {
             Diagnostics.log("persisted muted=\(source.muted) to \(sourceFilePath)")
         } catch {
             Diagnostics.log("failed to persist source settings: \(error.localizedDescription)")
+        }
+    }
+
+    private var bookmarkFileURL: URL? {
+        guard let sourceFilePath = configuration.sourceFilePath else {
+            return nil
+        }
+
+        let sourceFileURL = URL(fileURLWithPath: sourceFilePath)
+        if sourceFileURL.lastPathComponent == "sources.json" {
+            return sourceFileURL
+        }
+
+        return sourceFileURL.deletingLastPathComponent().appendingPathComponent("sources.json")
+    }
+
+    private func loadBookmarks() -> [ScenicSource] {
+        guard let bookmarkFileURL else {
+            return []
+        }
+
+        do {
+            return try SourceBookmarkStore.load(from: bookmarkFileURL)
+        } catch {
+            Diagnostics.log("failed to load bookmarks: \(error.localizedDescription)")
+            return []
         }
     }
 }

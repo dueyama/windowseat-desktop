@@ -5,20 +5,29 @@ import DesktopWindowCore
 final class StatusMenuController {
     private let statusItem: NSStatusItem
     private let sourceProvider: () -> ScenicSource?
+    private let bookmarksProvider: () -> [ScenicSource]
     private let onReload: () -> Void
     private let onSetMuted: (Bool) -> Void
+    private let onBookmarkCurrent: () -> Void
+    private let onApplyBookmark: (ScenicSource) -> Void
     private let statusMessage: String?
 
     init(
         configuration: AppConfiguration,
         sourceProvider: @escaping () -> ScenicSource?,
         onReload: @escaping () -> Void,
-        onSetMuted: @escaping (Bool) -> Void
+        onSetMuted: @escaping (Bool) -> Void,
+        bookmarksProvider: @escaping () -> [ScenicSource],
+        onBookmarkCurrent: @escaping () -> Void,
+        onApplyBookmark: @escaping (ScenicSource) -> Void
     ) {
         self.statusItem = NSStatusBar.system.statusItem(withLength: NSStatusItem.squareLength)
         self.sourceProvider = sourceProvider
         self.onReload = onReload
         self.onSetMuted = onSetMuted
+        self.bookmarksProvider = bookmarksProvider
+        self.onBookmarkCurrent = onBookmarkCurrent
+        self.onApplyBookmark = onApplyBookmark
         self.statusMessage = configuration.statusMessage
 
         if let button = statusItem.button {
@@ -30,6 +39,25 @@ final class StatusMenuController {
     }
 
     func refreshMenu() {
+        rebuildMenu()
+    }
+
+    @objc private func bookmarkCurrent() {
+        onBookmarkCurrent()
+        rebuildMenu()
+    }
+
+    @objc private func applyBookmark(_ sender: NSMenuItem) {
+        guard let index = sender.representedObject as? Int else {
+            return
+        }
+
+        let bookmarks = bookmarksProvider()
+        guard bookmarks.indices.contains(index) else {
+            return
+        }
+
+        onApplyBookmark(bookmarks[index])
         rebuildMenu()
     }
 
@@ -65,6 +93,7 @@ final class StatusMenuController {
         let menu = NSMenu()
         menu.autoenablesItems = false
         let source = sourceProvider()
+        let bookmarks = bookmarksProvider()
         let sourceTitle = source?.title ?? "No source configured"
         let sourceItem = NSMenuItem(title: sourceTitle, action: nil, keyEquivalent: "")
         sourceItem.isEnabled = true
@@ -98,6 +127,23 @@ final class StatusMenuController {
         openItem.isEnabled = source != nil
         menu.addItem(openItem)
 
+        menu.addItem(.separator())
+
+        let bookmarkItem = NSMenuItem(title: "Bookmark This Window", action: #selector(bookmarkCurrent), keyEquivalent: "b")
+        bookmarkItem.target = self
+        bookmarkItem.isEnabled = source != nil
+        if let source, bookmarks.contains(where: { $0.youtubeVideoID == source.youtubeVideoID }) {
+            bookmarkItem.state = .on
+        }
+        menu.addItem(bookmarkItem)
+
+        let bookmarksItem = NSMenuItem(title: "Bookmarks", action: nil, keyEquivalent: "")
+        bookmarksItem.submenu = bookmarksMenu(currentSource: source, bookmarks: bookmarks)
+        bookmarksItem.isEnabled = true
+        menu.addItem(bookmarksItem)
+
+        menu.addItem(.separator())
+
         let reloadItem = NSMenuItem(title: "Reload", action: #selector(reload), keyEquivalent: "r")
         reloadItem.target = self
         menu.addItem(reloadItem)
@@ -107,6 +153,33 @@ final class StatusMenuController {
         menu.addItem(quitItem)
 
         statusItem.menu = menu
+    }
+
+    private func bookmarksMenu(currentSource: ScenicSource?, bookmarks: [ScenicSource]) -> NSMenu {
+        let menu = NSMenu(title: "Bookmarks")
+        menu.autoenablesItems = false
+
+        guard !bookmarks.isEmpty else {
+            let emptyItem = NSMenuItem(title: "No Bookmarks", action: nil, keyEquivalent: "")
+            emptyItem.isEnabled = false
+            menu.addItem(emptyItem)
+            return menu
+        }
+
+        for (index, bookmark) in bookmarks.enumerated() {
+            let item = NSMenuItem(title: bookmark.title, action: #selector(applyBookmark(_:)), keyEquivalent: "")
+            item.target = self
+            item.representedObject = index
+            item.isEnabled = true
+
+            if currentSource?.youtubeVideoID == bookmark.youtubeVideoID {
+                item.state = .on
+            }
+
+            menu.addItem(item)
+        }
+
+        return menu
     }
 
     private func addAgentItems(for source: ScenicSource, to menu: NSMenu) {

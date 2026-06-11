@@ -28,7 +28,10 @@ final class DesktopWindowApp: NSObject, NSApplicationDelegate {
             configuration: configuration,
             sourceProvider: { [weak manager] in manager?.source },
             onReload: { [weak manager] in manager?.reload() },
-            onSetMuted: { [weak manager] muted in manager?.setMuted(muted) }
+            onSetMuted: { [weak manager] muted in manager?.setMuted(muted) },
+            bookmarksProvider: { [weak manager] in manager?.bookmarks ?? [] },
+            onBookmarkCurrent: { [weak manager] in manager?.bookmarkCurrentSource() },
+            onApplyBookmark: { [weak manager] source in manager?.applyBookmark(source) }
         )
         manager.onSourceChanged = { [weak statusController] in
             statusController?.refreshMenu()
