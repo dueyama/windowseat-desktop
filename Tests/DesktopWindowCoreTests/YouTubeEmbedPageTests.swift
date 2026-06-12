@@ -11,6 +11,7 @@ final class YouTubeEmbedPageTests: XCTestCase {
         XCTAssertTrue(html.contains("autoplay: 1"))
         XCTAssertTrue(html.contains("const initialMuted = true"))
         XCTAssertTrue(html.contains("const preferredQuality = 'highres'"))
+        XCTAssertTrue(html.contains("const shouldSyncToLiveEdge = false"))
         XCTAssertTrue(html.contains("vq: preferredQuality"))
         XCTAssertTrue(html.contains("setPlaybackQuality(preferredQuality)"))
         XCTAssertTrue(html.contains("onError"))
@@ -26,6 +27,34 @@ final class YouTubeEmbedPageTests: XCTestCase {
 
         XCTAssertTrue(html.contains("const initialMuted = false"))
         XCTAssertTrue(html.contains("window.desktopWindowSetMuted"))
+    }
+
+    func testLiveSourceSyncsToLiveEdgeOnStartup() throws {
+        let videoID = try XCTUnwrap(YouTubeVideoID("TESTVIDEO01"))
+        let source = ScenicSource(
+            title: "Live Test",
+            youtubeVideoID: videoID,
+            sourceKind: .live
+        )
+        let html = YouTubeEmbedPage.html(source: source)
+
+        XCTAssertTrue(html.contains("const shouldSyncToLiveEdge = true"))
+        XCTAssertTrue(html.contains("function syncToLiveEdge(target)"))
+        XCTAssertTrue(html.contains("Number(target.getDuration())"))
+        XCTAssertTrue(html.contains("target.seekTo(liveEdgeSeconds, true)"))
+        XCTAssertTrue(html.contains("scheduleLiveEdgeSync(event.target)"))
+    }
+
+    func testRecordingSourceDoesNotSyncToLiveEdge() throws {
+        let videoID = try XCTUnwrap(YouTubeVideoID("TESTVIDEO01"))
+        let source = ScenicSource(
+            title: "Recording Test",
+            youtubeVideoID: videoID,
+            sourceKind: .recording
+        )
+        let html = YouTubeEmbedPage.html(source: source)
+
+        XCTAssertTrue(html.contains("const shouldSyncToLiveEdge = false"))
     }
 
     func testPlaceholderEscapesHTML() {

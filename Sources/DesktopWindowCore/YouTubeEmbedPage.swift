@@ -7,12 +7,20 @@ public enum YouTubeEmbedPage {
             fillMode: source.fillMode,
             muted: source.muted,
             preferredQuality: source.preferredQuality,
+            syncToLiveEdge: source.sourceKind == .live,
             overlay: source.showOverlay ? overlayHTML(for: source) : ""
         )
     }
 
     public static func html(videoID: YouTubeVideoID, fillMode: FillMode) -> String {
-        html(videoID: videoID, fillMode: fillMode, muted: true, preferredQuality: .highres, overlay: "")
+        html(
+            videoID: videoID,
+            fillMode: fillMode,
+            muted: true,
+            preferredQuality: .highres,
+            syncToLiveEdge: false,
+            overlay: ""
+        )
     }
 
     private static func html(
@@ -20,11 +28,13 @@ public enum YouTubeEmbedPage {
         fillMode: FillMode,
         muted: Bool,
         preferredQuality: PlaybackQuality,
+        syncToLiveEdge: Bool,
         overlay: String
     ) -> String {
         let fitClass = fillMode.rawValue
         let mutedValue = muted ? "true" : "false"
         let preferredQualityValue = preferredQuality.rawValue
+        let syncToLiveEdgeValue = syncToLiveEdge ? "true" : "false"
 
         return """
         <!doctype html>
@@ -125,6 +135,10 @@ public enum YouTubeEmbedPage {
             let player;
             const initialMuted = \(mutedValue);
             const preferredQuality = '\(preferredQualityValue)';
+            const shouldSyncToLiveEdge = \(syncToLiveEdgeValue);
+            let liveEdgeSyncAttempts = 0;
+            let liveEdgeSyncCompleted = false;
+            let liveEdgeSyncTimer = null;
 
             function showPlaybackError() {
               document.body.classList.add('playback-failed');
@@ -142,6 +156,51 @@ public enum YouTubeEmbedPage {
               if (typeof target.setPlaybackQuality === 'function') {
                 target.setPlaybackQuality(preferredQuality);
               }
+            }
+
+            function scheduleLiveEdgeSync(target) {
+              if (!shouldSyncToLiveEdge || liveEdgeSyncCompleted || liveEdgeSyncAttempts >= 10 || liveEdgeSyncTimer !== null) {
+                return;
+              }
+
+              const delay = liveEdgeSyncAttempts === 0 ? 0 : 700;
+              liveEdgeSyncAttempts += 1;
+              liveEdgeSyncTimer = window.setTimeout(function() {
+                liveEdgeSyncTimer = null;
+                syncToLiveEdge(target);
+              }, delay);
+            }
+
+            function syncToLiveEdge(target) {
+              if (!target || !shouldSyncToLiveEdge || liveEdgeSyncCompleted) {
+                return;
+              }
+
+              if (typeof target.getDuration !== 'function' || typeof target.seekTo !== 'function') {
+                return;
+              }
+
+              const duration = Number(target.getDuration());
+              if (!Number.isFinite(duration) || duration <= 0) {
+                scheduleLiveEdgeSync(target);
+                return;
+              }
+
+              const currentTime = typeof target.getCurrentTime === 'function'
+                ? Number(target.getCurrentTime())
+                : 0;
+              const currentTimeValue = Number.isFinite(currentTime) ? currentTime : 0;
+              const liveEdgeSeconds = Math.max(0, duration - 1);
+
+              if (liveEdgeSeconds - currentTimeValue > 3) {
+                target.seekTo(liveEdgeSeconds, true);
+              }
+
+              if (typeof target.playVideo === 'function') {
+                target.playVideo();
+              }
+
+              liveEdgeSyncCompleted = true;
             }
 
             function onYouTubeIframeAPIReady() {
@@ -164,6 +223,7 @@ public enum YouTubeEmbedPage {
                       event.target.unMute();
                     }
                     event.target.playVideo();
+                    scheduleLiveEdgeSync(event.target);
                   },
                   onError: function(event) {
                     showPlaybackError();
@@ -171,6 +231,7 @@ public enum YouTubeEmbedPage {
                   onStateChange: function(event) {
                     if (event.data === YT.PlayerState.PLAYING || event.data === YT.PlayerState.BUFFERING) {
                       requestPreferredQuality(event.target);
+                      scheduleLiveEdgeSync(event.target);
                     }
                   }
                 }
