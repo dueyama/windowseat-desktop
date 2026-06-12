@@ -12,30 +12,27 @@ This repository currently contains the macOS implementation. The core idea is no
 
 Repository: <https://github.com/dueyama/windowseat-desktop>
 
-## Start With Codex / Codexで起動
+## Install With An Agent / エージェントでインストール
 
-GitHubでこのリポジトリを見つけたら、Mac上のCodexに次のように頼むだけで始められる想定です。
-公開READMEには具体的なデフォルト動画URLや動画IDは置きません。
-
-```txt
-https://github.com/dueyama/windowseat-desktop のREADMEを読んで、WindowSeatを実行してください。
-初回起動で Config/current-source.json がなければ、起動した時刻に昼間の地域を優先して、落ち着いた固定視点のYouTubeライブカメラを1つ探し、Config/current-source.json を作ってから起動してください。
-景色を変えるときは、最大画質が4K/UHDと分かるソースを優先し、起動中ならアプリを再起動せず Config/current-source.json の更新で反映してください。
-起動後はCodexで管理してください。
-景色、国や地域、ライブ優先か録画でもよいか、音の有無、今日の一言は、私の指示に合わせてカスタムしてください。
-YouTubeの映像をダウンロードしたり、ストリームURLを抽出したりしないでください。
-```
-
-If you found this repository on GitHub, give the repository URL to Codex running on your Mac and ask it to read the README and run the app:
+The intended handoff is short. Give the repository to a local agent and ask it to inspect, install, and run WindowSeat:
 
 ```txt
-Read the README for https://github.com/dueyama/windowseat-desktop and run WindowSeat.
-On first launch, if Config/current-source.json does not exist, choose one calm fixed-view YouTube live camera in a region that is currently in daylight, write Config/current-source.json, and then start the app.
-When changing scenery, prefer sources whose maximum quality is clearly 4K/UHD, and if the app is already running, update Config/current-source.json so it hot-reloads without restarting.
-After it starts, manage it with Codex.
-Customize the scenery, country or region, live-vs-recording preference, sound, and daily note based on my instructions.
-Do not download YouTube media or extract stream URLs.
+https://github.com/dueyama/windowseat-desktop の README を読んで、コードの安全性を確認してからインストールして。
 ```
+
+```txt
+Read the README for https://github.com/dueyama/windowseat-desktop, check the code safety, then install it.
+```
+
+The detailed agent instructions live outside the install prompt:
+
+- `docs/AGENT_INSTALL_SAFETY.md`: code inspection checklist for forks or unfamiliar checkouts
+- `docs/AI_AGENT_CURATOR.md`: scenic source selection and local runtime config
+- `docs/CODEX_AUTOMATION.md`: optional Codex automation recommendation after install
+- `docs/PORTING_CONCEPT.md`: how a Windows or Linux agent should port the concept
+- `docs/YOUTUBE_POLICY.md`: media-safety boundaries
+
+公開READMEには具体的なデフォルト動画URLや動画IDを置きません。インストール依頼文も長くしません。Codex や Claude などのローカルエージェントが、このREADMEと `docs/` の指針を読んで、フォークや未知のcheckoutに不審なコードが混ざっていないか確認し、初回ソース選定、起動まで行う想定です。
 
 WindowSeat is a macOS prototype for turning the desktop into a quiet scenic window.
 It renders a YouTube live camera through the official embedded player in a borderless AppKit window placed near the desktop layer.
@@ -69,33 +66,7 @@ The current SwiftPM executable target is still named `DesktopWindow`. The repo a
 
 現時点の SwiftPM 実行ターゲット名はまだ `DesktopWindow` です。リポジトリ名とプロダクトコンセプトは WindowSeat で、通常は `scripts/` 経由で起動するため、この内部名を意識する必要はあまりありません。
 
-## Use With Codex / Codexで使う
-
-If you found this repository on GitHub, the intended path is to give the repository URL to Codex running on your Mac and ask it to manage the app for you.
-
-GitHubでこのリポジトリを見つけた場合は、Mac上で動くCodexにリポジトリURLを渡し、このアプリの実行と管理を任せるのが想定される使い方です。
-
-Example prompt:
-
-```txt
-Clone https://github.com/dueyama/windowseat-desktop and manage WindowSeat for me.
-Run `swift test`. If `Config/current-source.json` does not exist,
-find a calm fixed-view YouTube live camera in a region that is currently in daylight,
-prefer a source whose maximum quality is clearly 4K/UHD,
-write `Config/current-source.json`, then start the app with `scripts/run-current.sh`.
-Do not download YouTube media or extract stream URLs.
-```
-
-日本語の依頼例:
-
-```txt
-https://github.com/dueyama/windowseat-desktop をcloneして、WindowSeatの実行と管理をしてください。
-`swift test` を実行してください。`Config/current-source.json` がなければ、
-起動した時刻に昼間の地域を優先して、落ち着いた固定視点のYouTubeライブカメラを1つ探し、
-最大画質が4K/UHDと分かるソースを優先し、
-`Config/current-source.json` を作ってから `scripts/run-current.sh` で起動してください。
-YouTubeの映像をダウンロードしたり、ストリームURLを抽出したりしないでください。
-```
+## Agent Operation / エージェント運用
 
 The agent-facing control surface is intentionally small:
 
@@ -113,56 +84,21 @@ scripts/status.sh        # 状態を確認
 scripts/stop.sh          # WindowSeatを停止
 ```
 
-## Scheduled Curation / 定期的な景色変更
+For daily or scheduled curation, the agent updates only `Config/current-source.json` and follows `docs/AI_AGENT_CURATOR.md`. If WindowSeat is already running, the app hot-reloads that local file.
 
-If your Codex environment supports automations or scheduled tasks, you can ask Codex to refresh WindowSeat on a schedule. The app itself does not need a built-in scheduler: Codex chooses a new source, updates `Config/current-source.json`, and the running app hot-reloads it.
+定期的な景色変更でも、READMEに長い依頼文を追加する必要はありません。エージェントは `docs/AI_AGENT_CURATOR.md` に従い、ローカル専用の `Config/current-source.json` を更新します。
 
-Codex のオートメーションや定期実行が使える環境では、WindowSeat の景色を定期的に変更できます。アプリ本体にスケジューラを持たせるのではなく、Codex が新しい景色を選び、`Config/current-source.json` を更新し、起動中のアプリがホットリロードで反映します。
+If the agent supports recurring automations, it should recommend one after a successful install or first launch. See `docs/CODEX_AUTOMATION.md`.
 
-Example automation prompt:
-
-```txt
-Every weekday morning, choose a calm fixed-view scenic YouTube live camera
-in a region that is currently in daylight. Prefer sources whose maximum quality
-is clearly 4K/UHD. Update Config/current-source.json for WindowSeat.
-If WindowSeat is not running, start it with scripts/run-current.sh.
-Do not download media or extract stream URLs.
-```
-
-日本語の定期実行依頼例:
-
-```txt
-平日の朝に、WindowSeat用の落ち着いた固定視点のYouTubeライブカメラを1つ選んでください。
-起動時刻に昼間の地域を優先し、最大画質が4K/UHDと分かるソースを優先してください。
-Config/current-source.json を更新してください。
-WindowSeatが起動していなければ scripts/run-current.sh で起動してください。
-YouTubeの映像をダウンロードしたり、ストリームURLを抽出したりしないでください。
-```
-
-To use the AI-curated daily window workflow, ask the agent to create or update `Config/current-source.json` first:
-
-AIが毎日選ぶ「今日の窓」として使う場合は、先に `Config/current-source.json` を作成または更新させます。
-
-```txt
-Find one scenic YouTube live camera suitable for calm desk work today.
-Prefer a fixed-view camera in a region that is currently in daylight.
-Prefer a source whose maximum quality is clearly 4K/UHD.
-Follow `docs/AI_AGENT_CURATOR.md`.
-Write `Config/current-source.json`. If WindowSeat is already running, let it hot-reload.
-If it is not running, run `scripts/run-current.sh`.
-```
-
-```txt
-今日の仕事に合う、落ち着いた絶景のYouTubeライブカメラを1つ探してください。
-起動した時刻に昼間の地域を優先し、固定視点のカメラを選んでください。
-最大画質が4K/UHDと分かるソースを優先してください。
-`docs/AI_AGENT_CURATOR.md` に従って `Config/current-source.json` を作り、
-WindowSeatが起動中ならホットリロードで反映してください。起動していなければ `scripts/run-current.sh` を実行してください。
-```
+Codex がオートメーションを使える場合は、インストールまたは初回起動後に「設定しますか？」と提案するのが自然です。詳細は `docs/CODEX_AUTOMATION.md` にあります。
 
 This must run on a Mac that can display macOS GUI windows. A cloud-only coding environment can edit the repository, but it cannot put a live window on your desktop.
 
 これはmacOSのGUIウィンドウを表示できるMac上で動かす必要があります。クラウドだけの開発環境ではリポジトリの編集はできますが、あなたのデスクトップにライブ窓を表示することはできません。
+
+Windows or Linux agents should read `docs/PORTING_CONCEPT.md` and build the local display surface for that OS instead of trying to run the AppKit implementation directly.
+
+Windows/Linux の場合は、同じ Swift/AppKit 実装をそのまま入れるのではなく、`docs/PORTING_CONCEPT.md` を読んで、そのOS向けの表示面を作る想定です。
 
 ## Run
 

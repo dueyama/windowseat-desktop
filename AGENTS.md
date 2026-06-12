@@ -18,6 +18,9 @@ The safe default implementation embeds official players or public camera streams
 
 ## Development Commands
 
+Before installing, running, or porting WindowSeat for a user, read `docs/AGENT_INSTALL_SAFETY.md`.
+If recommending or setting up recurring Codex automation, read `docs/CODEX_AUTOMATION.md` and ask for approval before creating or changing automations.
+
 ```sh
 swift test
 swift build
@@ -40,6 +43,9 @@ Without it, the app creates borderless windows near the desktop layer and ignore
 
 ## YouTube And Source Handling
 
+- Before curating or changing scenic sources, read `docs/AI_AGENT_CURATOR.md` and follow its current source-selection guidance.
+- For Windows or Linux users, read `docs/PORTING_CONCEPT.md` and treat the macOS app as a reference implementation rather than something that installs directly on those platforms.
+- Keep evolving source-selection rules in `docs/AI_AGENT_CURATOR.md`; do not keep expanding README install/run prompts with ad hoc curation instructions.
 - A YouTube video ID must be validated before embedding.
 - Do not parse or shell out to tools that expose raw stream URLs for YouTube.
 - If source search is added, use the YouTube Data API for discovery metadata only and keep keys out of git.

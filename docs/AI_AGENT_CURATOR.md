@@ -77,6 +77,69 @@ The file should match:
 - If the agent is unsure whether a video is live, embeddable, or appropriate, keep the previous source or ask before changing it.
 - If playback still fails at runtime, the app should keep the desktop quiet; use the menu bar "Open in YouTube" action for recovery.
 
+## Scenic Source Workflow
+
+Treat the first plausible result as a candidate, not the final choice. Build a short list, reject weak fits early, then write `Config/current-source.json` only after one source is clearly better for a quiet desktop window.
+
+Before selecting:
+
+1. Read `AGENTS.md`, `README.md`, and this guide.
+2. Inspect `Config/current-source.json` when present so the new source is meaningfully fresh.
+3. Inspect local bookmarks in `Config/sources.json` when present.
+4. Prefer a video ID that is not already bookmarked. If a bookmarked source is reused because it is still the strongest available live/daylight/fixed choice, say so in `agentNote.body`.
+5. Check whether WindowSeat is already running with `scripts/status.sh` before changing runtime state.
+
+Candidate quality:
+
+- Prefer fixed or very slow scenic cameras over motion content. The view should feel like a window, not a tour.
+- Favor daylight at the camera location for automatic rotations unless the user asks for a specific region or nighttime mood.
+- Prefer true live streams. Avoid premieres, ended streams, archives, looped recordings, and videos labeled `配信済み`, `streamed`, `streamed live`, `premiere`, or `archive` when a live source is requested.
+- Prefer official or stable public operators: tourism boards, observatories, transport operators, resorts, municipalities, and established webcam channels.
+- Prefer 4K/UHD sources when the title or official metadata clearly says so, but do not trust resolution claims alone.
+- Avoid heavy on-screen UI, news tickers, disaster footage, security-camera framing, people-centered scenes, loud brand overlays, fast pans, walking/driving/riding videos, drone footage, virtual tours, highlight reels, and compilation streams.
+
+Verification:
+
+- Validate the YouTube video ID before embedding.
+- Use YouTube oEmbed or an equivalent metadata-only embeddability check before selecting a source.
+- When practical, also check the official embed URL returns successfully.
+- If source search is implemented in code, use the YouTube Data API for discovery metadata only and keep keys out of git.
+- Do not use downloaders, raw stream URL extractors, frame extraction, screenshots, recording, caching, transcoding, or any path that copies YouTube audiovisual content.
+- If embeddability, live state, or suitability remains unclear, keep the previous source or ask the user instead of switching to a questionable candidate.
+
+## Menu Copy And Metadata
+
+Menu-facing text should be concise Japanese and should include the country name when the city, island, region, or camera name may not be obvious to the user.
+
+Use:
+
+- `title`: include country and recognizable place, plus the source title when useful.
+- `agentNote.headline`: short Japanese headline with country/place.
+- `agentNote.body`: explain why this source was chosen, including daylight/live/4K/embeddability checks and any fallback or bookmarked-source reuse.
+- `quote.text`: short original Japanese line that suits calm desk work; prefer original text over copyrighted quotations.
+
+Keep:
+
+- `sourceKind`: `live` for true live sources; `recording` only when a recording fallback is intentionally chosen.
+- `muted`: `true` unless the user explicitly asks for sound.
+- `showOverlay`: `false` unless the user explicitly wants desktop text.
+- `preferredQuality`: `highres`.
+- `fillMode`: `fill`.
+
+## Applying A Source
+
+Only write the ignored local runtime file:
+
+```txt
+Config/current-source.json
+```
+
+Do not commit or push `Config/current-source.json` or `Config/sources.json`.
+
+If WindowSeat is already running, update `Config/current-source.json` and let hot reload pick it up. Do not stop and restart just to change scenery. Verify with `scripts/status.sh` and, when available, the diagnostics log for `hot reloaded source=<videoId>`.
+
+If WindowSeat is stopped and the task is to run or apply the current window, start it with `scripts/run-current.sh`. If the task is only to prepare the next source, updating the ignored runtime config is enough.
+
 ## Run With The Current Source
 
 ```sh
