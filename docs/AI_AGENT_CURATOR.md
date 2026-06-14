@@ -109,13 +109,13 @@ Verification:
 
 ## Menu Copy And Metadata
 
-Menu-facing text should be concise Japanese and should include the country name when the city, island, region, or camera name may not be obvious to the user.
+Menu-facing text should be concise Japanese and should include the country name when the city, island, region, or camera name may not be obvious to the user. Treat it as a small note about the place, not a verification log.
 
 Use:
 
 - `title`: include country and recognizable place, plus the source title when useful.
 - `agentNote.headline`: short Japanese headline with country/place.
-- `agentNote.body`: explain why this source was chosen, including daylight/live/4K/embeddability checks and any fallback or bookmarked-source reuse.
+- `agentNote.body`: give a short place-aware note with useful context such as geography, local character, seasonal light, cultural or historical background, or what the view is likely showing. Mention fallback or bookmarked-source reuse when relevant, but keep technical checks such as oEmbed, HTTP status, and `playabilityStatus` out of menu-facing copy.
 - `quote.text`: short original Japanese line that suits calm desk work; prefer original text over copyrighted quotations.
 
 Keep:
