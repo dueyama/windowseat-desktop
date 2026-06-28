@@ -115,7 +115,7 @@ Use:
 
 - `title`: include country and recognizable place, plus the source title when useful.
 - `agentNote.headline`: short Japanese headline with country/place.
-- `agentNote.body`: give a short place-aware note with useful context such as geography, local character, seasonal light, cultural or historical background, or what the view is likely showing. Mention fallback or bookmarked-source reuse when relevant, but keep technical checks such as oEmbed, HTTP status, and `playabilityStatus` out of menu-facing copy.
+- `agentNote.body`: give a short place-aware note. It must include at least one concrete local fact or context cue, such as geography, local character, seasonal light, cultural or historical background, or what the view is likely showing. Mention fallback or bookmarked-source reuse when relevant, but keep technical checks such as oEmbed, HTTP status, and `playabilityStatus` out of menu-facing copy.
 - `quote.text`: short original Japanese line that suits calm desk work; prefer original text over copyrighted quotations.
 
 Keep:

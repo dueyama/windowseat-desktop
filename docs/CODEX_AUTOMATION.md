@@ -66,9 +66,10 @@ The recurring task should:
 7. Verify embeddability with YouTube oEmbed or an equivalent metadata-only check.
 8. Update only the ignored local runtime config `Config/current-source.json`.
 9. Keep `muted: true`, `showOverlay: false`, `preferredQuality: "highres"`, and `fillMode: "fill"`.
-10. If WindowSeat is already running, rely on hot reload and verify with `scripts/status.sh` and diagnostics logs when available.
-11. If WindowSeat is stopped and the user expects it to be active, start it with `scripts/run-current.sh`.
-12. Do not commit or push local runtime config.
-13. Finish with a concise Japanese summary of the selected source and whether it reloaded or launched.
+10. Make `agentNote.body` include at least one concrete local fact or place-context cue, not only local time, selection rationale, or verification details.
+11. If WindowSeat is already running, rely on hot reload and verify with `scripts/status.sh` and diagnostics logs when available.
+12. If WindowSeat is stopped and the user expects it to be active, start it with `scripts/run-current.sh`.
+13. Do not commit or push local runtime config.
+14. Finish with a concise Japanese summary of the selected source and whether it reloaded or launched.
 
 The automation belongs to Codex. The WindowSeat app should not grow its own scheduler just to support this workflow.

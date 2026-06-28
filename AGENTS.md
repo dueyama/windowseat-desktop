@@ -51,6 +51,7 @@ Without it, the app creates borderless windows near the desktop layer and ignore
 - If source search is added, use the YouTube Data API for discovery metadata only and keep keys out of git.
 - If an AI agent selects the daily source, it may write metadata to `Config/current-source.json`; it must not write downloaded media or extracted stream URLs.
 - AI agents are expected to manage runtime state through `scripts/run-current.sh`, `scripts/status.sh`, and `scripts/stop.sh`.
+- Menu-facing Japanese source notes must include at least one concrete local fact or place-context cue, not only local time, selection rationale, or verification details.
 - On first run, if `Config/current-source.json` is missing, the AI agent should search automatically instead of copying an example. Prefer a fixed scenic live camera in a region that is currently in daylight.
 - If WindowSeat is already running, source changes should be applied by updating `Config/current-source.json` and letting the app hot-reload. Do not stop and restart the app just to change scenery.
 - Default source selection should prefer fixed scenic cameras. Reject walking, driving, ride, drone, tour, or compilation videos unless the user explicitly asks for motion.
