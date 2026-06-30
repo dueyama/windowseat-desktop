@@ -46,16 +46,12 @@ The file should match:
   "selectedAt": "2026-06-11T12:00:00+09:00",
   "agentNote": {
     "headline": "今日は静かな窓から始めましょう",
-    "body": "仕事の雰囲気に合う短い一言。"
-  },
-  "quote": {
-    "text": "短いオリジナルの一言、または権利上問題のない短い引用。",
-    "attribution": "Optional attribution"
+    "body": "場所、季節、気温、眺めの魅力が伝わる短い説明。"
   }
 }
 ```
 
-`quote.attribution` is optional. Prefer original text unless the quote is clearly safe to reuse.
+`quote` is optional. For ordinary scenic rotations, prefer a richer `agentNote.body` over a quote or maxim-style line unless the user explicitly asks for one.
 
 ## Agent Selection Rules
 
@@ -86,12 +82,15 @@ Before selecting:
 1. Read `AGENTS.md`, `README.md`, and this guide.
 2. Inspect `Config/current-source.json` when present so the new source is meaningfully fresh.
 3. Inspect local bookmarks in `Config/sources.json` when present.
-4. Prefer a video ID that is not already bookmarked. If a bookmarked source is reused because it is still the strongest available live/daylight/fixed choice, say so in `agentNote.body`.
-5. Check whether WindowSeat is already running with `scripts/status.sh` before changing runtime state.
+4. Inspect local rejections and preferences in `Config/rejected-sources.local.json` when present. Do not reuse IDs in `rejectedSources` for matching default/fixed-camera requests; treat `conditionalSources` as timing or visibility guidance, not permanent rejection.
+5. Prefer a video ID that is not already bookmarked. If a bookmarked source is reused because it is still the strongest available live/daylight/fixed choice, say so in `agentNote.body`.
+6. Check whether WindowSeat is already running with `scripts/status.sh` before changing runtime state.
 
 Candidate quality:
 
 - Prefer fixed or very slow scenic cameras over motion content. The view should feel like a window, not a tour.
+- Avoid sources in `Config/rejected-sources.local.json` when the rejection reason matches the current request, especially user-rejected moving, panning, tracking, rolling, or weak scenic sources. If a source is listed under `conditionalSources`, reuse it only when the stated conditions are favorable.
+- Honor local `preferences` in `Config/rejected-sources.local.json`, such as preferring sea views only when the camera is fixed or nearly fixed.
 - Favor daylight at the camera location for automatic rotations unless the user asks for a specific region or nighttime mood.
 - Prefer true live streams. Avoid premieres, ended streams, archives, looped recordings, and videos labeled `配信済み`, `streamed`, `streamed live`, `premiere`, or `archive` when a live source is requested.
 - Prefer official or stable public operators: tourism boards, observatories, transport operators, resorts, municipalities, and established webcam channels.
@@ -115,8 +114,8 @@ Use:
 
 - `title`: include country and recognizable place, plus the source title when useful.
 - `agentNote.headline`: short Japanese headline with country/place.
-- `agentNote.body`: give a short place-aware note. It must include at least one concrete local fact or context cue, such as geography, local character, seasonal light, cultural or historical background, or what the view is likely showing. Mention fallback or bookmarked-source reuse when relevant, but keep technical checks such as oEmbed, HTTP status, and `playabilityStatus` out of menu-facing copy.
-- `quote.text`: short original Japanese line that suits calm desk work; prefer original text over copyrighted quotations.
+- `agentNote.body`: give a place-aware note that feels inviting rather than slogan-like. When practical, include the approximate current local temperature from a current weather source or near-term forecast, rounded to a friendly value such as `約17℃`, plus the current season or seasonal light. Omit weather rather than guessing if data is unavailable. It must include at least one concrete local fact or context cue, such as geography, local character, seasonal light, cultural or historical background, or what the view is likely showing. Mention fallback or bookmarked-source reuse when relevant, but keep technical checks such as oEmbed, HTTP status, and `playabilityStatus` out of menu-facing copy.
+- `quote.text`: optional; omit it for ordinary rotations unless the user asks for a quote.
 
 Keep:
 
@@ -160,7 +159,7 @@ Use official or stable public channels when possible.
 Do not download media or extract stream URLs.
 Return only metadata for WindowSeat's Config/current-source.json:
 title, youtubeVideoID, fillMode, muted, showOverlay, sourceKind, selectedBy, selectedAt,
-preferredQuality, agentNote.headline, agentNote.body, quote.text, and optional quote.attribution.
-Keep the note in Japanese, brief, calm, and work-appropriate.
+preferredQuality, agentNote.headline, and agentNote.body.
+Keep the note in Japanese, concise, place-aware, and work-appropriate.
 After writing the file, let the running app hot-reload. If it is not running, run scripts/run-current.sh.
 ```
